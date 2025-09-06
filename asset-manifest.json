@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/pdf-qa-app/static/css/main.ed2a510c.css",
-    "main.js": "/pdf-qa-app/static/js/main.5329814c.js",
+    "main.js": "/pdf-qa-app/static/js/main.319fe506.js",
     "static/js/149.7d33e839.chunk.js": "/pdf-qa-app/static/js/149.7d33e839.chunk.js",
     "static/js/453.2a8c0fab.chunk.js": "/pdf-qa-app/static/js/453.2a8c0fab.chunk.js",
     "index.html": "/pdf-qa-app/index.html",
     "main.ed2a510c.css.map": "/pdf-qa-app/static/css/main.ed2a510c.css.map",
-    "main.5329814c.js.map": "/pdf-qa-app/static/js/main.5329814c.js.map",
+    "main.319fe506.js.map": "/pdf-qa-app/static/js/main.319fe506.js.map",
     "149.7d33e839.chunk.js.map": "/pdf-qa-app/static/js/149.7d33e839.chunk.js.map",
     "453.2a8c0fab.chunk.js.map": "/pdf-qa-app/static/js/453.2a8c0fab.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ed2a510c.css",
-    "static/js/main.5329814c.js"
+    "static/js/main.319fe506.js"
   ]
 }
