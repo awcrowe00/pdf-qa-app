@@ -464,10 +464,15 @@ const App: React.FC = () => {
         const textContent = await page.getTextContent();
         const pageText = textContent.items
           .map((item: any) => item.str)
-          .join(' ');
+            .filter(str => str.length > 0)
+            .join('\n'); 
         fullText += pageText + '\n';
         console.log(`Page ${i} text length:`, pageText.length);
       }
+      fullText = fullText
+      .replace(/\r\n|\r|\n/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();   
 
       console.log('Total extracted text length:', fullText.length);
       return fullText;
@@ -557,35 +562,27 @@ const App: React.FC = () => {
     });
   };
 
-  // Extract questions from the text (improved pattern matching)
   const extractQuestions = (text: string): void => {
-    // Multiple patterns to catch different question formats
-    const patterns = [
-      /^.*\?$/gm, // Lines ending with ?
-      /^\d+\.\s*.*\?$/gm, // Numbered questions ending with ?
-      /^Q\d*[:.]\s*.*\?$/gm, // Q1: format ending with ?
-      /^Question\s*\d*[:.]\s*.*\?$/gm, // Question 1: format
-    ];
+    // Matches questions starting with a number and ending with a (Reference: ... ) pattern
+    const questionPattern = /\d+\.\s*([\s\S]*?\(Reference:.*?\))/g;
 
-    let foundQuestions: string[] = [];
-    patterns.forEach(pattern => {
-      const matches = text.match(pattern) || [];
-      foundQuestions = [...foundQuestions, ...matches];
-    });
+    const foundQuestions: string[] = [];
+    let match;
+    
+    while ((match = questionPattern.exec(text)) !== null) {
+      // match[1] contains the full question text without the number
+      const questionText = match[1].trim();
+      foundQuestions.push(questionText);
+    }
 
-    // Remove duplicates and clean up
-    const uniqueQuestions = Array.from(new Set(foundQuestions));
-    
-    const cleanQuestions: Question[] = uniqueQuestions
-      .map(q => q.trim())
-      .filter(q => q.length > 10) // Filter out very short questions
-      .map((question, index) => ({
-        id: index + 1,
-        text: question.replace(/^\d+\.\s*|^Q\d*[:.]\s*|^Question\s*\d*[:.]\s*/i, '').trim(),
-        answer: '',
-        sourceFile: ''
-      }));
-    
+    // Convert to Question objects
+    const cleanQuestions: Question[] = foundQuestions.map((q, index) => ({
+      id: index + 1,
+      text: q,
+      answer: '',
+      sourceFile: ''
+    }));
+
     setQuestions(cleanQuestions);
   };
 
