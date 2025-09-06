@@ -586,7 +586,6 @@ const App: React.FC = () => {
     setQuestions(cleanQuestions);
   };
 
-  // Search reference PDFs for answers
   const searchReferencePDFs = async (): Promise<void> => {
     if (referenceDocs.length === 0) {
       setError('No reference documents loaded. Please add PDF files to the public/reference-pdfs folder.');
@@ -594,31 +593,48 @@ const App: React.FC = () => {
     }
 
     setIsProcessing(true);
-    
-    const updatedQuestions: Question[] = questions.map(question => {
-      // Simple keyword-based search
-      const questionKeywords = extractKeywords(question.text);
-      let bestMatch = '';
-      let bestScore = 0;
-      let sourceFile = '';
 
+    const updatedQuestions: Question[] = questions.map(question => {
+      const questionKeywords = extractKeywords(question.text);
+
+      const matchedSnippets: { snippet: string; source: string; score: number }[] = [];
+
+      // Loop through all reference PDFs
       referenceDocs.forEach(doc => {
         const score = calculateMatchScore(questionKeywords, doc.content);
-        if (score > bestScore) {
-          bestScore = score;
-          // Extract relevant sentence/paragraph
-          bestMatch = extractRelevantText(questionKeywords, doc.content);
-          sourceFile = doc.filename;
+        if (score > 0) {
+          let snippet = extractRelevantText(questionKeywords, doc.content);
+
+          // Clean up spacing and line breaks
+          snippet = snippet.replace(/\s+/g, ' ').trim();
+
+          matchedSnippets.push({ snippet, source: doc.filename, score });
         }
       });
 
+      if (matchedSnippets.length === 0) {
+        return {
+          ...question,
+          answer: 'No relevant answer found in reference documents.',
+          sourceFile: ''
+        };
+      }
+
+      // Sort by score descending and take top matches
+      matchedSnippets.sort((a, b) => b.score - a.score);
+      const topMatches = matchedSnippets.slice(0, 3); // Adjust N as desired
+
+      const finalAnswer = topMatches
+        .map(m => `${m.snippet} (Source: ${m.source})`)
+        .join('\n\n');
+
       return {
         ...question,
-        answer: bestMatch || 'No relevant answer found in reference documents.',
-        sourceFile: sourceFile
+        answer: finalAnswer,
+        sourceFile: topMatches.map(m => m.source).join(', ')
       };
     });
-    
+
     setQuestions(updatedQuestions);
     setIsProcessing(false);
   };
